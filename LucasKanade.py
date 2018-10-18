@@ -88,19 +88,10 @@ def LucasKanade(It, It1, rect, p0 = np.zeros(2)):
 
 	It1_intp = get_intp_img(It1)
 
-	#It1_dx = cv2.Sobel(It1, cv2.CV_32F, 1, 0)
-	#It1_dy = cv2.Sobel(It1, cv2.CV_32F, 0, 1)
-	
-	#It1_dx_intp = get_intp_img(It1_dx)
-	#It1_dy_intp = get_intp_img(It1_dy)
-	
 	while True:
 		p += dp
 		search_row_ids = template_row_ids + p[1, 0]
 		search_col_ids = template_col_ids + p[0, 0]
-
-		#A_c0 = It1_dx_intp.ev(search_row_ids, search_col_ids)
-		#A_c1 = It1_dy_intp.ev(search_row_ids, search_col_ids)
 		
 		# here, x means row, y means col
 		A_c0 = It1_intp.ev(search_row_ids, search_col_ids, dx=0, dy=1)
@@ -116,7 +107,7 @@ def LucasKanade(It, It1, rect, p0 = np.zeros(2)):
 		# (2, 1)
 		dp_svd = svd_solve(A, b)
 		
-		print(np.sum(np.abs(A @ dp_svd - b)))
+		print('difference with template: %f' % np.sum(np.abs(A @ dp_svd - b)))
 
 		dp_diff = np.sum((dp_svd)**2)
 		if dp_diff < thr:
