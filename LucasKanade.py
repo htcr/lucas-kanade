@@ -88,19 +88,23 @@ def LucasKanade(It, It1, rect, p0 = np.zeros(2)):
 
 	It1_intp = get_intp_img(It1)
 
-	It1_dx = cv2.Sobel(It1, cv2.CV_32F, 1, 0)
-	It1_dy = cv2.Sobel(It1, cv2.CV_32F, 0, 1)
+	#It1_dx = cv2.Sobel(It1, cv2.CV_32F, 1, 0)
+	#It1_dy = cv2.Sobel(It1, cv2.CV_32F, 0, 1)
 	
-	It1_dx_intp = get_intp_img(It1_dx)
-	It1_dy_intp = get_intp_img(It1_dy)
+	#It1_dx_intp = get_intp_img(It1_dx)
+	#It1_dy_intp = get_intp_img(It1_dy)
 	
 	while True:
 		p += dp
 		search_row_ids = template_row_ids + p[1, 0]
 		search_col_ids = template_col_ids + p[0, 0]
 
-		A_c0 = It1_dx_intp.ev(search_row_ids, search_col_ids)
-		A_c1 = It1_dy_intp.ev(search_row_ids, search_col_ids)
+		#A_c0 = It1_dx_intp.ev(search_row_ids, search_col_ids)
+		#A_c1 = It1_dy_intp.ev(search_row_ids, search_col_ids)
+		
+		A_c0 = It1_intp.ev(search_row_ids, search_col_ids, dx=0, dy=1)
+		A_c1 = It1_intp.ev(search_row_ids, search_col_ids, dx=1, dy=0)
+
 		# (N, 2)
 		A = np.stack((A_c0, A_c1), axis=1)
 
@@ -117,16 +121,6 @@ def LucasKanade(It, It1, rect, p0 = np.zeros(2)):
 		if dp_diff < thr:
 			break
 		dp = dp_svd
-
-		'''
-		fig, ax = plt.subplots(1)
-		ax.imshow(It1)
-		l, t, r, b = rect
-		w, h = r-l, b-t
-		rect_p = patches.Rectangle((l+p[0,0], t+p[1,0]),w,h,linewidth=1,edgecolor='r',facecolor='none')
-		ax.add_patch(rect_p)
-		plt.show()
-		'''
 
 	# (2,)
 	return p.reshape(-1)
