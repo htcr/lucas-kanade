@@ -102,6 +102,7 @@ def LucasKanade(It, It1, rect, p0 = np.zeros(2)):
 		#A_c0 = It1_dx_intp.ev(search_row_ids, search_col_ids)
 		#A_c1 = It1_dy_intp.ev(search_row_ids, search_col_ids)
 		
+		# here, x means row, y means col
 		A_c0 = It1_intp.ev(search_row_ids, search_col_ids, dx=0, dy=1)
 		A_c1 = It1_intp.ev(search_row_ids, search_col_ids, dx=1, dy=0)
 
