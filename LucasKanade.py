@@ -17,7 +17,6 @@ def LucasKanade(It, It1, rect, p0 = np.zeros(2)):
 	# Output:
 	#	p: movement vector [dp_x, dp_y]
 	
-    # Put your implementation here
     # stop when ||delta_p||^2 < thr
 	thr = 0.001
 	# p is initial guess
