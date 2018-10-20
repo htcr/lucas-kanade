@@ -18,7 +18,7 @@ def SubtractDominantMotion(image1, image2):
 
 	image1_warped = affine_transform(image1, M_inv, output_shape=image2.shape)
 
-	image_diff = np.abs(image2 - image1)
+	image_diff = np.abs(image2 - image1_warped)
 
 	mask = image_diff > thr
-    return mask
+	return mask
