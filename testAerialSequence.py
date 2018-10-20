@@ -10,6 +10,7 @@ import cv2
 vid = np.load('../data/aerialseq.npy')
 vid = vid.astype(np.float32)
 print(vid.shape)
+print(np.mean(vid))
 
 output_dir = '../aerial_output'
 if not os.path.exists(output_dir):
@@ -17,16 +18,17 @@ if not os.path.exists(output_dir):
 
 frame_num = vid.shape[2]
 
-frame_num = 5
-
 for i in range(1, frame_num):
-    It = vid[i-1]
-    It1 = vid[i]
+    
+    print('frame %d' % i)
+    
+    It = vid[:, :, i-1]
+    It1 = vid[:, :, i]
 
     mask = SubtractDominantMotion(It, It1)
 
     vis = It1.copy()
-    vis = np.stack((vis, vis, vis), axis=2)
+    vis = np.stack((vis, vis, vis), axis=2)*255.0
     vis[:, :, 2] += (mask.astype(np.float32))*100.0
 
     vis = np.clip(vis, 0, 255).astype(np.uint8)

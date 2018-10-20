@@ -12,7 +12,7 @@ def LucasKanadeAffine(It, It1):
     
 	p = np.zeros((6, 1), dtype=np.float32)
 	dp = np.zeros((6, 1), dtype=np.float32)
-	thr = 0.001
+	thr = 0.000001
 
 	M = np.eye(3, dtype=np.float32) # (3, 3) get initial M from initial p 
 	
@@ -21,6 +21,8 @@ def LucasKanadeAffine(It, It1):
 	
 	It1_xs = np.arange(0, It1_w, 1, dtype=np.float32)
 	It1_ys = np.arange(0, It1_h, 1, dtype=np.float32)
+	It1_xs, It1_ys = np.meshgrid(It1_xs, It1_ys)
+	It1_xs, It1_ys = It1_xs.reshape(-1), It1_ys.reshape(-1)
 	It1_ones = np.ones((It1_xs.shape[0],), dtype=np.float32)
 
 	all_It1_points = np.stack((It1_xs, It1_ys, It1_ones), axis=0) # get all point coordinate from It1, homogeneous, (3, 1)
@@ -36,8 +38,8 @@ def LucasKanadeAffine(It, It1):
 		# (3, N_It1)
 		all_It1_points_back_project = np.linalg.inv(M) @ all_It1_points
 		
-		x_inbound = (0 <= all_It1_points_back_project[0, :] < It_w)
-		y_inbound = (0 <= all_It1_points_back_project[1, :] < It_h)
+		x_inbound = (0 <= all_It1_points_back_project[0, :]) * (all_It1_points_back_project[0, :] < It_w)
+		y_inbound = (0 <= all_It1_points_back_project[1, :]) * (all_It1_points_back_project[1, :] < It_h)
 		point_inbound = x_inbound * y_inbound
 
 		# (3, N) filter out backprojected points that falls out It 
@@ -60,8 +62,8 @@ def LucasKanadeAffine(It, It1):
 		pixel_diff = np.sum((template_pixels - search_pixels)**2)
 		print('difference with template: %f' % pixel_diff)
 
-		It1_dx = It1_intp.ev(search_row_ids, search_col_ids, dx=1, dy=0) # (N, )
-		It1_dy = It1_intp.ev(search_row_ids, search_col_ids, dx=0, dy=1) # (N, )
+		It1_dx = It1_intp.ev(search_row_ids, search_col_ids, dx=0, dy=1) # (N, )
+		It1_dy = It1_intp.ev(search_row_ids, search_col_ids, dx=1, dy=0) # (N, )
 
 		# (2N, 1) Construct from It1_dx and It1_dy
 		A_part1 = np.stack((It1_dx, It1_dy), axis=1) # (N, 2)
@@ -80,10 +82,11 @@ def LucasKanadeAffine(It, It1):
 		b = template_pixels - search_pixels # (N, )
 		b = b.reshape(-1, 1) # (N, 1)
 		
-		dp_svd = svd_solve(A, b)
+		dp_LSE = np.linalg.inv((A.transpose() @ A)) @ A.transpose() @ b
 		
-		if np.sum((dp_svd - dp)**2) < thr:
+		if np.sum((dp_LSE - dp)**2) < thr:
 			break
+		dp = dp_LSE
 
 	# remove last row from M
 	return M[0:2, :]
