@@ -2,5 +2,35 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import animation
 import matplotlib.patches as patches
+import os
+from LucasKanadeAffine import LucasKanadeAffine
+from SubtractDominantMotion import SubtractDominantMotion
+import cv2
 
-# write your script here, we recommend the above libraries for making your animation
+vid = np.load('../data/aerialseq.npy')
+vid = vid.astype(np.float32)
+print(vid.shape)
+
+output_dir = '../aerial_output'
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
+
+frame_num = vid.shape[2]
+
+frame_num = 5
+
+for i in range(1, frame_num):
+    It = vid[i-1]
+    It1 = vid[i]
+
+    mask = SubtractDominantMotion(It, It1)
+
+    vis = It1.copy()
+    vis = np.stack((vis, vis, vis), axis=2)
+    vis[:, :, 2] += (mask.astype(np.float32))*100.0
+
+    vis = np.clip(vis, 0, 255).astype(np.uint8)
+
+    cv2.imwrite(os.path.join(output_dir, ('3_3_frame_%d.jpg' % i)), vis)
+    
+    

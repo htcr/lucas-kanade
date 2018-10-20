@@ -31,6 +31,6 @@ class Video(object):
         plt.show()
 
 
-car_vid = np.load('../data/carseq.npy')*255
+car_vid = np.load('../data/aerialseq.npy')*255
 car_anim = Video(car_vid)
 car_anim.play()
