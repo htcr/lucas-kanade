@@ -14,3 +14,6 @@ def LucasKanadeBasis(It, It1, rect, bases):
     # Put your implementation here
     return np.zeros(2)
     
+
+B = np.load('../data/sylvbases.npy')
+print(B.shape)

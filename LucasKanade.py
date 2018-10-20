@@ -1,62 +1,10 @@
 import numpy as np
 from scipy.interpolate import RectBivariateSpline
 import cv2
-import numpy.linalg as la
-
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-
-eps = 0.00001
-
-def svd(A):
-    u, s, vh = la.svd(A)
-    S = np.zeros(A.shape)
-    S[:s.shape[0], :s.shape[0]] = np.diag(s)
-    return u, S, vh
-
-def inverse_sigma(S):
-    inv_S = S.copy().transpose()
-    for i in range(min(S.shape)):
-        if abs(inv_S[i, i]) > eps :
-            inv_S[i, i] = 1.0/inv_S[i, i]
-    return inv_S
-
-def svd_solve(A, b):
-    U, S, Vt = svd(A)
-    inv_S = inverse_sigma(S)
-    svd_solution = Vt.transpose() @ inv_S @ U.transpose() @ b
-    return svd_solution
-
-
-def indice_from_rect(rect):
-	# rect: tuple, (l, t, r, b)
-	# return: np float arrays of shape (N, 1), row_ids, col_ids 
-	# fractional coordinates will be handled by interpolation
-	l, t, r, b = rect
-	# inclusive
-	row_min = t
-	row_max = b
-	col_min = l
-	col_max = r
-	if row_min > row_max or col_min > col_max:
-		return np.zeros((0, 1), dtype=np.int32), np.zeros((0, 1), dtype=np.int32)
-	row_ids = np.arange(row_min, row_max+1, 1, dtype=np.float32)
-	col_ids = np.arange(col_min, col_max+1, 1, dtype=np.float32)
-	col_ids_all, row_ids_all = np.meshgrid(col_ids, row_ids)
-	row_ids_all, col_ids_all = row_ids_all.reshape(-1), col_ids_all.reshape(-1)
-	return row_ids_all, col_ids_all
-
-
-def get_intp_img(img):
-	# img: np array, (h, w)
-	# return: RectBivariateSpline, able to access
-	# pixel at fractional coordinate; Out-of-bound
-	# pixel values equal to nearest boundary values.
-	h, w = img.shape[:2]
-	row_ids = np.arange(0, h, 1, dtype=np.float32)
-	col_ids = np.arange(0, w, 1, dtype=np.float32)
-	img_intp = RectBivariateSpline(row_ids, col_ids, img, kx=2, ky=2)
-	return img_intp
+from svd import svd_solve
+from helper import indice_from_rect, get_intp_img
 
 
 def LucasKanade(It, It1, rect, p0 = np.zeros(2)):
