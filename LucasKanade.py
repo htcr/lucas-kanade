@@ -52,14 +52,14 @@ def LucasKanade(It, It1, rect, p0 = np.zeros(2)):
 		b = b.reshape(-1, 1)
 
 		# (2, 1)
-		dp_svd = svd_solve(A, b)
+		dp_LSE = np.linalg.inv((A.transpose() @ A)) @ A.transpose() @ b
 		
-		print('difference with template: %f' % np.sum(np.abs(A @ dp_svd - b)))
+		print('difference with template: %f' % np.sum(np.abs(A @ dp_LSE - b)))
 
-		dp_diff = np.sum((dp_svd)**2)
+		dp_diff = np.sum((dp_LSE)**2)
 		if dp_diff < thr:
 			break
-		dp = dp_svd
+		dp = dp_LSE
 
 	# (2,)
 	return p.reshape(-1)
