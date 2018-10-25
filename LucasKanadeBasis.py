@@ -31,6 +31,7 @@ def LucasKanadeBasis(It, It1, rect, bases, p0 = np.zeros(2)):
 	# prepare basis
 	B = bases.reshape(-1, bases.shape[2])
 	BBt = B @ B.transpose()
+
 	B_multiplier = np.eye(BBt.shape[0]) - BBt
 
 	while True:
