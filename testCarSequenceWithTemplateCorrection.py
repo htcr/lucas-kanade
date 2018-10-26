@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 from matplotlib import animation
 import matplotlib.patches as patches
 from LucasKanade import LucasKanade
+import os
+import cv2
 
 car_vid = np.load('../data/carseq.npy')
 car_vid = car_vid.astype(np.float32)
@@ -14,6 +16,10 @@ init_frame = car_vid[:, :, 0]
 frame_num = car_vid.shape[2]
 
 naive_track_result = np.load('carseqrects.npy')
+
+output_dir = '../car_output_template_correction'
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
 
 for i in range(1, frame_num):
     print('tracking frame %d' % (i))
@@ -34,17 +40,16 @@ for i in range(1, frame_num):
     
     all_rects.append(cur_rect_refined)
 
-    if i in (1, 100, 200, 300, 400):
-        fig, ax = plt.subplots(1)
-        ax.imshow(cur_frame, cmap='gray')
-        l, t, r, b = naive_track_result[i, :]
-        l1, t1, r1, b1 = cur_rect_refined
-        rect_patch = patches.Rectangle((l, t), r-l, b-t, linewidth=1, edgecolor='y', facecolor='none')
-        rect_patch_refined = patches.Rectangle((l1, t1), r1-l1, b1-t1, linewidth=1, edgecolor='g', facecolor='none')
-        ax.add_patch(rect_patch)
-        ax.add_patch(rect_patch_refined)
-        #plt.show()
-        plt.savefig(('1_4_frame_%d.png' % i))
+    # visualize
+    cur_frame_show = np.stack((cur_frame, cur_frame, cur_frame), axis=2)*255.0
+    cur_frame_show = cur_frame_show.astype(np.uint8).copy()
+
+    l, t, r, b = map(int, naive_track_result[i, :])
+    l1, t1, r1, b1 = map(int, cur_rect_refined)
+    cv2.rectangle(cur_frame_show, (l, t), (r, b), (0, 255, 255), 2)        
+    cv2.rectangle(cur_frame_show, (l1, t1), (r1, b1), (0, 255, 0), 2)        
+    cv2.imwrite((os.path.join(output_dir, '1_4_frame_%d.png') % i), cur_frame_show)
+    # visualize
 
     prev_frame = cur_frame
 

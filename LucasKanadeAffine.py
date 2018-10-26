@@ -12,7 +12,7 @@ def LucasKanadeAffine(It, It1):
     
 	p = np.zeros((6, 1), dtype=np.float32)
 	dp = np.zeros((6, 1), dtype=np.float32)
-	thr = 0.000001
+	thr = 0.0001
 
 	M = np.eye(3, dtype=np.float32) # (3, 3) get initial M from initial p 
 	
